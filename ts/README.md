@@ -29,11 +29,11 @@ npm install --save-exact @ownkube/keyseal
 
 ## Key providers
 
-| Provider | Where the key lives | `init` flag | In code |
-| --- | --- | --- | --- |
-| [AWS KMS](https://github.com/ownkube/keyseal/blob/main/docs/aws.md) | KMS, in your AWS account | `--kms-key <key>` | `awsKms()` from `@ownkube/keyseal/aws` |
-| [Cloudflare Worker](https://github.com/ownkube/keyseal/blob/main/docs/cloudflare.md) | A Worker on your Cloudflare account (free plan) | `--worker <url>` | `worker()` |
-| [Local key](https://github.com/ownkube/keyseal/blob/main/docs/local.md) | Your machine and the app's env | `--local` | `localKey()` |
+| Provider                                                                             | Where the key lives                             | `init` flag       | In code                                |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------- | ----------------- | -------------------------------------- |
+| [AWS KMS](https://github.com/ownkube/keyseal/blob/main/docs/aws.md)                  | KMS, in your AWS account                        | `--kms-key <key>` | `awsKms()` from `@ownkube/keyseal/aws` |
+| [Cloudflare Worker](https://github.com/ownkube/keyseal/blob/main/docs/cloudflare.md) | A Worker on your Cloudflare account (free plan) | `--worker <url>`  | `worker()`                             |
+| [Local key](https://github.com/ownkube/keyseal/blob/main/docs/local.md)              | Your machine and the app's env                  | `--local`         | `localKey()`                           |
 
 KMS and the Worker keep your secrets sealed if the platform's env store
 leaks. A local key does not; use it to get started or for low-stakes apps.
