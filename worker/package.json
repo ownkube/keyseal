@@ -1,0 +1,16 @@
+{
+  "name": "keyseal-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "logs": "wrangler tail"
+  },
+  "dependencies": {
+    "@ownkube/keyseal": "0.1.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.3"
+  }
+}

@@ -1,0 +1,541 @@
+{
+  "format": 1,
+  "description": "keyseal format v1 conformance vectors. Open each bundle with the reserved `test` provider returning `dataKey`, the clock set to `now`, and the environment pinned to `env` when present. `ok` vectors must ask the provider for the data key with exactly `keyContext` and yield exactly `secrets` (with a previous value only where listed); the others must fail with `error`.",
+  "vectors": [
+    {
+      "name": "empty",
+      "description": "A bundle with no secrets.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"jgWY81Ob-hRSXDpnGoQoww\",\n  \"env\": \"production\",\n  \"version\": 1,\n  \"updatedAt\": \"2026-10-22T12:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {},\n  \"mac\": \"B8SsZTtqZZ7Eb2DLngQELnl6UOZypvKquZe32xOpj_0\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "jgWY81Ob-hRSXDpnGoQoww",
+          "keyseal:env": "production",
+          "keyseal:epoch": "1"
+        },
+        "secrets": {}
+      }
+    },
+    {
+      "name": "basic",
+      "description": "Several secrets, including an empty, a non-ASCII and a multi-line value.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "env": "production",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 1,\n  \"updatedAt\": \"2026-10-22T12:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"qQmRgHkWSIHY4OpyIIdoeeXesuW06VnTqnfz0cpqpCTucR1A88_Tn9xvZg-v2ga2iWKw6A\"\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"dcj9EiEiAYvAlhfNXWAZ1aan3Zy2_PtivFUQIt6szoE\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+          "keyseal:env": "production",
+          "keyseal:epoch": "1"
+        },
+        "secrets": {
+          "DATABASE_URL": {
+            "value": "postgres://app:s3cr3t@db.internal:5432/app",
+            "v": 1
+          },
+          "OPENAI_API_KEY": {
+            "value": "sk-test-0000000000000000",
+            "v": 1
+          },
+          "EMPTY": {
+            "value": "",
+            "v": 1
+          },
+          "UNICODE": {
+            "value": "pässwörd 🔑 秘密",
+            "v": 1
+          },
+          "MULTILINE": {
+            "value": "-----BEGIN KEY-----\nMIIBOgIBAAJBAKj34GkxFhD9\n-----END KEY-----\n",
+            "v": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "previous-live",
+      "description": "A rotated secret whose previous value is inside its grace window.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+          "keyseal:env": "production",
+          "keyseal:epoch": "1"
+        },
+        "secrets": {
+          "DATABASE_URL": {
+            "value": "postgres://app:s3cr3t@db.internal:5432/app",
+            "v": 1
+          },
+          "OPENAI_API_KEY": {
+            "value": "sk-test-1111111111111111",
+            "v": 2,
+            "previous": {
+              "value": "sk-test-0000000000000000",
+              "v": 1
+            }
+          },
+          "EMPTY": {
+            "value": "",
+            "v": 1
+          },
+          "UNICODE": {
+            "value": "pässwörd 🔑 秘密",
+            "v": 1
+          },
+          "MULTILINE": {
+            "value": "-----BEGIN KEY-----\nMIIBOgIBAAJBAKj34GkxFhD9\n-----END KEY-----\n",
+            "v": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "previous-expired",
+      "description": "The same bundle read after the grace window: previous must not be returned.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-23T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+          "keyseal:env": "production",
+          "keyseal:epoch": "1"
+        },
+        "secrets": {
+          "DATABASE_URL": {
+            "value": "postgres://app:s3cr3t@db.internal:5432/app",
+            "v": 1
+          },
+          "OPENAI_API_KEY": {
+            "value": "sk-test-1111111111111111",
+            "v": 2
+          },
+          "EMPTY": {
+            "value": "",
+            "v": 1
+          },
+          "UNICODE": {
+            "value": "pässwörd 🔑 秘密",
+            "v": 1
+          },
+          "MULTILINE": {
+            "value": "-----BEGIN KEY-----\nMIIBOgIBAAJBAKj34GkxFhD9\n-----END KEY-----\n",
+            "v": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "prototype-names",
+      "description": "Names that collide with object internals in some languages.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"oACfAk2mCDlO5b2bw4BcEw\",\n  \"env\": \"staging\",\n  \"version\": 1,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"__proto__\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VSBsAGX6eAfeY2BWdp8vhb-rNuea7HGVz7PbBALhZPwdtRh7whCXTixH1Q\"\n    },\n    \"constructor\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"bQF9nB9kofGJVkHyuDcQ4yXhqxyniYcyCqomyt5bbVfKJ7yT7HDD4FKUcpLZ\"\n    },\n    \"toString\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"vTBbeyLLtA4GTdNygbvc16apK-74rtRS_l5MQF3pUVxLclmRJWob7Srg\"\n    }\n  },\n  \"mac\": \"BkuBbbuLuLPtpPshLSr3HiSHYNaCY9mtXbIVaTAuxeY\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "oACfAk2mCDlO5b2bw4BcEw",
+          "keyseal:env": "staging",
+          "keyseal:epoch": "1"
+        },
+        "secrets": {
+          "__proto__": {
+            "value": "not a prototype",
+            "v": 1
+          },
+          "constructor": {
+            "value": "not a constructor",
+            "v": 1
+          },
+          "toString": {
+            "value": "not a function",
+            "v": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "rekeyed",
+      "description": "A rekeyed bundle: epoch 2, which the reader must pass to its key provider.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 2,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"TzZNj1gYJXclbw66zH3QODJT3A5UePmTGg-tD59ck_TS4eWj9qNBOidqhOniNWtmiodTnQzBDZtqadl9yjMXsACqOBL5KQ\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"min3Ch-zozEED6tVWwMRPlVsJ3hav1oqDoxnYA\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"RTb2se2uhtg3HIb7lWPZGML9MPBywzGy-D4faMVqvppYfnbbXW0JhcAap9QxsR8DO67Q4AXMLC5F9n_zgq3LRsUmTYa5GgTxPXviPLh-SVLHLEL4PIUaerpAog\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"grEMU1NOWr9TNboYVbIiSxkD-gJ5MtjAv3yGKscKT6ds3Ysrrf5ukgORJF0qgBp-iC3iCQ\"\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"cbhzx-853dJpVldNIyuJB4hv5xVtmrK5WHDMkMMJs7Tnn7BWdkUng6_Pe5ZmbZiCq1E\"\n    }\n  },\n  \"mac\": \"uVm0D5lyhcOcfqykSf1uqY7yn7p_MgptFaajZSkV4J4\"\n}\n",
+      "expect": {
+        "ok": true,
+        "keyContext": {
+          "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+          "keyseal:env": "production",
+          "keyseal:epoch": "2"
+        },
+        "secrets": {
+          "DATABASE_URL": {
+            "value": "postgres://app:s3cr3t@db.internal:5432/app",
+            "v": 1
+          },
+          "OPENAI_API_KEY": {
+            "value": "sk-test-0000000000000000",
+            "v": 1
+          },
+          "EMPTY": {
+            "value": "",
+            "v": 1
+          },
+          "UNICODE": {
+            "value": "pässwörd 🔑 秘密",
+            "v": 1
+          },
+          "MULTILINE": {
+            "value": "-----BEGIN KEY-----\nMIIBOgIBAAJBAKj34GkxFhD9\n-----END KEY-----\n",
+            "v": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "tampered-value",
+      "description": "One ciphertext character changed.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBAAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "version-changed",
+      "description": "Bundle version edited.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 3,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "secret-removed",
+      "description": "A secret deleted from the file.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "epoch-changed",
+      "description": "Key epoch edited, as if to dodge a revocation of the bundle's real epoch.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 7,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "previous-removed",
+      "description": "A grace-window previous value deleted.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\"\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "wrong-data-key",
+      "description": "An untouched bundle opened with a different data key.",
+      "dataKey": "__79_Pv6-fj39vX08_Lx8O_u7ezr6uno5-bl5OPi4eA",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "mac_mismatch"
+      }
+    },
+    {
+      "name": "swapped-values-valid-mac",
+      "description": "Two values swapped and the MAC recomputed: the AAD must bind each value to its name.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    }\n  },\n  \"mac\": \"Go0Ef1SAic4jcgjH7IyEP1VNgeA3lReBKGNnJWT7HBU\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "decrypt_failed"
+      }
+    },
+    {
+      "name": "slot-swap-valid-mac",
+      "description": "Current and previous ciphertexts swapped and the MAC recomputed.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"bZj42XwIz6-3Om5HfNOC1GT1k250qs69T3FYOlhrTKU\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "decrypt_failed"
+      }
+    },
+    {
+      "name": "env-renamed-valid-mac",
+      "description": "Environment renamed and the MAC recomputed: the AAD must bind values to the environment.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"staging\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"vStiQYAlr932ljNCzgiuuAaCS_jjwKJjtJUd1aOMMN4\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "decrypt_failed"
+      }
+    },
+    {
+      "name": "unknown-field",
+      "description": "An extra top-level field.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\",\n  \"note\": \"hello\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "future-format",
+      "description": "A format version this reader doesn't know.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 2,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "unsupported_format"
+      }
+    },
+    {
+      "name": "padded-mac",
+      "description": "Base64 padding on the MAC.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8=\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "bad-name",
+      "description": "A secret name starting with a digit.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    },\n    \"1BAD\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "previous-not-older",
+      "description": "previous.v equal to v.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 2,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "fractional-timestamp",
+      "description": "Milliseconds in a timestamp.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00.000Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "version-zero",
+      "description": "A version below 1.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 0,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "epoch-missing",
+      "description": "A key reference without an epoch.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "epoch-zero",
+      "description": "A key epoch below 1.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 0,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "invalid_format"
+      }
+    },
+    {
+      "name": "env-pinned-mismatch",
+      "description": "A valid bundle, but the reader pins another environment.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "env": "staging",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"test\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "env_mismatch"
+      }
+    },
+    {
+      "name": "other-provider",
+      "description": "The bundle names a key provider the reader didn't supply.",
+      "dataKey": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "now": "2026-10-22T14:00:00Z",
+      "bundle": "{\n  \"keyseal\": 1,\n  \"id\": \"eOhr95-yNpF0pZqexJ01Fw\",\n  \"env\": \"production\",\n  \"version\": 2,\n  \"updatedAt\": \"2026-10-22T13:00:00Z\",\n  \"key\": {\n    \"provider\": \"aws-kms\",\n    \"keyId\": \"test-key\",\n    \"epoch\": 1,\n    \"wrapped\": \"dGVzdA\"\n  },\n  \"secrets\": {\n    \"DATABASE_URL\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"aWnxyjNLpQeVcPjnQvOQrnfqYcYynmtEJQPAgcaxAA8TV9yl9VE6UQcZzDsCPx3-qc29EV9wYNHRaFVx_zZNNycqJNf41w\"\n    },\n    \"EMPTY\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"ZZ5M1NpVZvc5mdjmzJtf15W5ZItfJwnUccsrlg\"\n    },\n    \"MULTILINE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"SXgqHVQvVTZsJV1WQqErv5uxvN9zoOeb0gbrjIK2zFihR6r_itTnkXwRhYO4DjubxyNz51R8qKMICmHEoMqWKydAe6rjXTdJhxgNFr9sJsS7ae3pr-qSNUuCYg\"\n    },\n    \"OPENAI_API_KEY\": {\n      \"v\": 2,\n      \"rotatedAt\": \"2026-10-22T13:00:00Z\",\n      \"value\": \"VzAMtnkIerfUQDLH5YRBxAZiCCdOrc03I5KyKrWwNRQIq44FFYZxpJNOHZkL0SqJTTdbSQ\",\n      \"previous\": {\n        \"v\": 1,\n        \"expiresAt\": \"2026-10-23T13:00:00Z\",\n        \"value\": \"74SuV-NBNx01W_DN80r4hRqFoMJMHjXu2NUFZ4GOrsYOcfNoG9lDNUq-Qk08KUouRiQoGQ\"\n      }\n    },\n    \"UNICODE\": {\n      \"v\": 1,\n      \"rotatedAt\": \"2026-10-22T12:00:00Z\",\n      \"value\": \"uUw-WU1R1rRJEEXVeCFUl0Wj95TL6C8o9XwpNPVx0UKCWsc0rgumcP6IDltagyL_pCQ\"\n    }\n  },\n  \"mac\": \"jgUkApE-qAFsgl8qP82sMShooguM7Yg2Nv5XPypxfr8\"\n}\n",
+      "expect": {
+        "ok": false,
+        "error": "provider_mismatch"
+      }
+    }
+  ],
+  "localDescription": "The `local` provider (section 4.3). Holding only `key`, unwrap `wrapped` for `keyId` with `keyContext`. `ok` vectors must derive `derivedKeyId` from `key` and return `dataKey`; the others must fail with `error`.",
+  "local": [
+    {
+      "name": "local-unwrap",
+      "description": "A data key wrapped with a local key, at epoch 2.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "production",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": true,
+        "derivedKeyId": "RmTRuXXlQAf4T2BtyI6ymg",
+        "dataKey": "CW0YETPmrglRTThnvnwm-uz40oT1nGtUSre-hNDBhJo"
+      }
+    },
+    {
+      "name": "local-epoch-changed",
+      "description": "The same wrapped key presented under another epoch.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "production",
+        "keyseal:epoch": "3"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    },
+    {
+      "name": "local-env-changed",
+      "description": "The same wrapped key presented for another environment.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "staging",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    },
+    {
+      "name": "local-bundle-changed",
+      "description": "The same wrapped key copied into another bundle.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "AAAAAAAAAAAAAAAAAAAAAA",
+        "keyseal:env": "production",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    },
+    {
+      "name": "local-tampered",
+      "description": "One byte of the wrapped key changed.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "production",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiA1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    },
+    {
+      "name": "local-truncated",
+      "description": "A wrapped key one byte short.",
+      "key": "keyseal_local_odMYOYOOf3LcHxVlVjs4ToWVn6M0rkzo9aP-xJ1qBjQ",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "production",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z4",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    },
+    {
+      "name": "local-other-key",
+      "description": "The reader holds a different local key than the bundle names.",
+      "key": "keyseal_local_XxLPSzlhHOektoRPhSXUwixBS6mc0uQlLCvm8Hd_Hng",
+      "keyId": "RmTRuXXlQAf4T2BtyI6ymg",
+      "keyContext": {
+        "keyseal:bundle": "eOhr95-yNpF0pZqexJ01Fw",
+        "keyseal:env": "production",
+        "keyseal:epoch": "2"
+      },
+      "wrapped": "jKCTONLrO3fzUCSfpqt5FsMS1VJ9qiX1unZcSzJWEEoNUdMSAQxivoDW5_0IqzUkB59i24aI-Kaj6z5J",
+      "expect": {
+        "ok": false,
+        "error": "key_unavailable"
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "keyseal",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+
+  // Workers Logs keeps one line per request: who asked, for which bundle,
+  // environment and epoch, and whether it was allowed. Never keys or tokens.
+  "observability": { "enabled": true },
+
+  // The wrapping key is a secret, never a var. Save a copy offline first:
+  //   npx keyseal key --new
+  //   npx wrangler secret put KEYSEAL_KEY
+  //
+  // Who may ask for what. Empty means nobody: every request is refused.
+  // `npx keyseal policy <bundle>` prints the entry for a bundle, and
+  // `npx keyseal token` makes a token and prints the hash that goes here.
+  "vars": {
+    "KEYSEAL_ACCESS": {
+      "clients": [
+        // { "name": "alice", "role": "editor", "env": "production", "token": "sha256:..." },
+        // { "name": "production-app", "role": "app", "env": "production", "bundle": "<bundle id>", "token": "sha256:..." }
+      ]
+      // "minEpoch": { "<bundle id>": 2 }
+    }
+  }
+}

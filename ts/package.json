@@ -1,0 +1,84 @@
+{
+  "name": "@ownkube/keyseal",
+  "version": "0.1.0",
+  "description": "Encrypted secrets in your repo, unlocked by your own KMS key, rotated without a redeploy.",
+  "keywords": [
+    "aws-kms",
+    "cloudflare-workers",
+    "dotenv",
+    "encryption",
+    "env",
+    "envelope-encryption",
+    "kms",
+    "secret-rotation",
+    "secrets"
+  ],
+  "homepage": "https://github.com/ownkube/keyseal#readme",
+  "bugs": "https://github.com/ownkube/keyseal/issues",
+  "license": "MIT",
+  "author": "Ownkube <security@ownkube.io>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ownkube/keyseal.git",
+    "directory": "ts"
+  },
+  "bin": {
+    "keyseal": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./aws": {
+      "types": "./dist/aws.d.ts",
+      "default": "./dist/aws.js"
+    },
+    "./s3": {
+      "types": "./dist/s3.d.ts",
+      "default": "./dist/s3.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    },
+    "./cloudflare": {
+      "types": "./dist/cloudflare.d.ts",
+      "default": "./dist/cloudflare.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test",
+    "test:watch": "vp test watch",
+    "vectors": "node --experimental-strip-types scripts/gen-vectors.ts",
+    "fix": "vp check --fix",
+    "check": "vp check",
+    "prepublishOnly": "vp check && vp test && vp pack"
+  },
+  "dependencies": {
+    "@aws-sdk/client-kms": "3.1155.0",
+    "@aws-sdk/client-s3": "3.1155.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2",
+    "vite-plus": "1.3.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@12.14.0"
+}
