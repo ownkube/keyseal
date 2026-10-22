@@ -92,7 +92,7 @@ jobs:
       - name: Publish bundles
         run: |
           for f in secrets/*.ks.json; do
-            npx --yes @ownkube/keyseal@0.1.0 ls "$f" > /dev/null
+            npx --yes @ownkube/keyseal@0.1.1 ls "$f" > /dev/null
             aws s3 cp "$f" "s3://acme-keyseal/$(basename "$f")" \
               --content-type application/json
           done

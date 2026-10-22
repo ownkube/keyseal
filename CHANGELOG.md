@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+Same code as 0.1.0, published from GitHub Actions with npm provenance.
+Check it with `npm audit signatures`.
+
 ## 0.1.0
 
 First release.

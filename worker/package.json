@@ -8,7 +8,7 @@
     "logs": "wrangler tail"
   },
   "dependencies": {
-    "@ownkube/keyseal": "0.1.0"
+    "@ownkube/keyseal": "0.1.1"
   },
   "devDependencies": {
     "wrangler": "4.151.3"
