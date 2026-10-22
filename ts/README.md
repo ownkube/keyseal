@@ -59,6 +59,7 @@ Or load them in code:
 
 ```ts
 import { createKeyseal, worker } from "@ownkube/keyseal";
+import Stripe from "stripe";
 
 const secrets = await createKeyseal({
   source: "secrets/production.ks.json", // or s3(...) or url(...)
@@ -66,8 +67,14 @@ const secrets = await createKeyseal({
   env: "production",
 });
 
-secrets.get("STRIPE_SECRET_KEY");
-secrets.on("rotated", (e) => console.log("rotated", e.changed));
+// get() always returns the current value. Rebuild clients that hold one
+// when it rotates; no restart or redeploy needed.
+let stripe = new Stripe(secrets.get("STRIPE_SECRET_KEY"));
+secrets.on("rotated", (e) => {
+  if (e.changed.includes("STRIPE_SECRET_KEY")) {
+    stripe = new Stripe(secrets.get("STRIPE_SECRET_KEY"));
+  }
+});
 ```
 
 Test without any cloud account:

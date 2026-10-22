@@ -141,6 +141,7 @@ npx keyseal run secrets/production.ks.json --env production -- node server.js
 import { createKeyseal, worker, localKey } from "@ownkube/keyseal";
 import { awsKms } from "@ownkube/keyseal/aws";
 import { s3 } from "@ownkube/keyseal/s3";
+import Stripe from "stripe";
 
 const secrets = await createKeyseal({
   source: s3("s3://acme-keyseal/production.ks.json"), // or a file path or URL
@@ -148,11 +149,18 @@ const secrets = await createKeyseal({
   env: "production",
 });
 
-secrets.get("STRIPE_SECRET_KEY");
-secrets.on("rotated", (e) => console.log("rotated", e.changed));
+// get() always returns the current value. Rebuild clients that hold one
+// when it rotates; no restart or redeploy needed.
+let stripe = new Stripe(secrets.get("STRIPE_SECRET_KEY"));
+secrets.on("rotated", (e) => {
+  if (e.changed.includes("STRIPE_SECRET_KEY")) {
+    stripe = new Stripe(secrets.get("STRIPE_SECRET_KEY"));
+  }
+});
 ```
 
-The full walkthrough is in [Getting started](docs/getting-started.md).
+The full walkthrough is in [Getting started](docs/getting-started.md), and
+[Rotation](docs/rotation.md) covers publishing new values.
 
 ## Compared with other tools
 
