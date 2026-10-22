@@ -1,7 +1,7 @@
 {
   "name": "@ownkube/keyseal",
   "version": "0.1.0",
-  "description": "Encrypted secrets in your repo, unlocked by your own KMS key, rotated without a redeploy.",
+  "description": "Secrets your app unlocks at runtime through a key service you own (AWS KMS, a Cloudflare Worker, or a local key), rotated without a redeploy.",
   "keywords": [
     "aws-kms",
     "cloudflare-workers",

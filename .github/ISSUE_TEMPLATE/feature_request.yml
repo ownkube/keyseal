@@ -1,0 +1,21 @@
+name: Feature request
+description: A new provider, platform, command or option.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you're trying to do, and where keyseal gets in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you'd like
+  - type: checkboxes
+    id: format
+    attributes:
+      label: Scope
+      options:
+        - label: This would change the bundle format or the crypto (spec/)

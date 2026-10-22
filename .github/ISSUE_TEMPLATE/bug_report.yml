@@ -1,0 +1,41 @@
+name: Bug report
+description: Something doesn't work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste a secret value, key, token or a full bundle here.** Names, versions and error codes are fine.
+        Security issues go to security@ownkube.io instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command or code you ran, and what you saw. Include the error code in parentheses, e.g. `(key_unavailable)`.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Key provider
+      options: [AWS KMS, Cloudflare Worker, Local key, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: keyseal version
+      placeholder: "npx keyseal --version"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Node version and platform
+      placeholder: "Node 24.11, Vercel / Fly / ECS / local macOS"
