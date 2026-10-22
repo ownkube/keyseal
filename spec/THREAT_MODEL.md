@@ -219,6 +219,6 @@ with npm provenance. **Reduced.**
 
 ## Status
 
-keyseal is pre-1.0 and has not had an external security review yet. The
-format and this document are open for review before 1.0, and reports go to
+keyseal has not had an external security review yet. The
+format and this document are open for review, and reports go to
 security@ownkube.io.

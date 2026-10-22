@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+Same code as 0.1.1. The README, SECURITY.md and the threat model no longer
+describe keyseal as pre-1.0.
+
 ## 0.1.1
 
 Same code as 0.1.0, published from GitHub Actions with npm provenance.

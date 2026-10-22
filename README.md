@@ -285,7 +285,7 @@ repo, bucket or URL is what protects it from edits. The
 
 ## Security
 
-keyseal is pre-1.0 and has not had an external security review yet. The
+keyseal has not had an external security review yet. The
 [threat model](spec/THREAT_MODEL.md) and [format](spec/FORMAT.md) are open
 for review. Releases are published from GitHub Actions with npm
 provenance; check them with `npm audit signatures`.
