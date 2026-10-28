@@ -308,4 +308,4 @@ docs/     user documentation
 
 ## License
 
-[MIT](LICENSE) © Ownkube
+[MIT](LICENSE) © [Ownkube](https://ownkube.io)
